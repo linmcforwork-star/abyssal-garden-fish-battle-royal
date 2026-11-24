@@ -576,6 +576,36 @@ struct VO { @builtin(position) cp: vec4f, @location(0) wp: vec3f, @location(1) n
   c += alb * sky * ca * .45 * (1. - top) + sky * pow(1. - ndv, 3.) * .35;
   return fin(fog(c, i.wp, z));
 }
+// game fish, placed by game.js every frame: a = position + size, b = heading + (colour code + phase in the fraction)
+// colour code: 0 smaller than you (edible), 1 same size, 2 bigger (danger), 3 you
+@vertex fn vsGame(i: VI) -> VO {
+  var o: VO;
+  let t = g.cam.w; let sz = i.a.w; let ph = fract(i.b.w) * TAU;
+  let T = normalize(i.b.xyz);
+  let c = cross(vec3f(0., 1., 0.), T); let S = select(vec3f(1., 0., 0.), normalize(c), length(c) > 1e-3); let Up = cross(T, S);
+  var l = i.p;
+  l.z += sin(t * 9. + ph + l.x * 5.) * .2 * (.25 - l.x);
+  let w = i.a.xyz + (T * l.x + Up * l.y + S * l.z) * sz;
+  o.cp = g.vp * vec4f(w, 1.); o.wp = w; o.n = T * i.n.x + Up * i.n.y + S * i.n.z; o.op = i.p; o.sd = i.b.w;
+  o.lt = shadow1(w);
+  return o;
+}
+@fragment fn fsGame(i: VO) -> @location(0) vec4f {
+  let n = normalize(i.n); let L = g.sun.xyz; let V = normalize(g.cam.xyz - i.wp);
+  let z = zone(i.wp); let vv = vol(i.wp);
+  let k = floor(i.sd);
+  var top = vec3f(.05, .40, .30); var bel = vec3f(.55, 1., .75); var glow = vec3f(.05, .55, .30);
+  if (k > 2.5) { top = vec3f(.9, .45, .04); bel = vec3f(1., .88, .45); glow = vec3f(1., .6, .15); }
+  else if (k > 1.5) { top = vec3f(.40, .02, .04); bel = vec3f(.95, .30, .22); glow = vec3f(1.1, .08, .04); }
+  else if (k > .5) { top = vec3f(.30, .33, .40); bel = vec3f(.80, .80, .82); glow = vec3f(.18, .2, .24); }
+  let alb = mix(bel, top, ss(-.05, .2, i.op.y));
+  let E = sunE(i.wp.y, z) * i.lt;
+  var c = alb * (E * (.25 + .75 * sat(dot(n, L))) + amb(i.wp, n, vv.g, z) * 1.3);
+  c += E * pow(sat(dot(n, normalize(V + L))), 24.);
+  c += glow * (.3 + .7 * pow(1. - sat(dot(n, V)), 2.)) * .5;
+  let d = length(i.wp - g.cam.xyz);
+  return fin(fog(c, i.wp, z) + glow * .3 * exp(-d * .025));
+}
 `;
 
 // ---------------------------------------------------------------- water surface seen from below
