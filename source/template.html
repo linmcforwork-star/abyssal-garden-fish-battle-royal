@@ -1,8 +1,33 @@
 <!doctype html>
+<!--
+Abyss Bite: a small eat-and-grow game built on Abyssal Garden.
+
+Abyssal Garden - MIT License
+Copyright (c) 2026 Maksymilian Dendura
+https://github.com/Noniv/abyssal-garden
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+-->
 <html lang=en>
 <head>
 <meta charset=utf-8>
-<title>Abyssal Garden</title>
+<title>Abyss Bite</title>
 <meta name=viewport content="width=device-width,initial-scale=1">
 <meta name=theme-color content=#03131c>
 <style>
@@ -76,8 +101,7 @@ button:active, a:active { transform: translateY(.1em); filter: brightness(.9); }
 
 /* GitHub and Ko-fi: always at the bottom of the menu, in their own colours */
 #f { position: absolute; left: 0; right: 0; bottom: 1.5em; display: flex; justify-content: center; gap: 1em; font-size: .8em; }
-a + a { background: #ff5e5b; color: #fff; }
-svg { width: 1.5em; height: 1.5em; fill: currentColor; }
+#f a { background: #03131cb3; color: #b8f3ff; box-shadow: none; text-transform: none; letter-spacing: .03em; }
 
 /* dark plates under the dive button: detail level, list of controls, touch hint */
 #q, #k, #h { padding: 1em 1.6em; border-radius: .7em; background: #03131cb3; }
@@ -113,6 +137,18 @@ svg { width: 1.5em; height: 1.5em; fill: currentColor; }
 }
 .g #o { display: flex; }
 .p #o { display: none; }
+/* game HUD: level, progress to the next one, dash stamina, time */
+#u {
+  position: absolute; left: 50%; bottom: 1.2em; transform: translateX(-50%); display: none; align-items: center; gap: .6em;
+  padding: .5em 1em; border-radius: .7em; background: #03131cb3; font-size: .9em; letter-spacing: .08em; pointer-events: none; white-space: nowrap;
+}
+.g #u { display: flex; }
+.bar { display: block; width: 7em; height: .55em; overflow: hidden; border-radius: 1em; background: #ffffff26; }
+.bar i { display: block; height: 100%; background: linear-gradient(90deg, #3ee08f, #b8ffd6); transform: scaleX(0); transform-origin: 0; transition: transform .15s; }
+#us { background: linear-gradient(90deg, #ffb02e, #ffe39a); }
+#us.x { background: #ff5b4d; }
+#r { min-height: 1.4em; color: #ffe39a; font-size: 1.1em; }
+#hint { max-width: 30em; font-size: .75em; letter-spacing: .06em; color: #b8ffd6; }
 #i {
   position: absolute; top: 1em; left: 1.2em; margin: 0; font: .8em/1.6 ui-monospace, Consolas, monospace;
   white-space: pre-wrap; text-shadow: 0 1px 4px #000; pointer-events: none;
@@ -122,7 +158,8 @@ svg { width: 1.5em; height: 1.5em; fill: currentColor; }
 <body class=l>
 <canvas id=c></canvas>
 <div id=m>
-  <h1>Abyssal Garden</h1>
+  <h1>Abyss Bite</h1>
+  <p id=r></p>
   <div id=a>
     <div id=l><div id=p><i id=b></i></div><p id=s>Diving…</p><p id=w hidden>Use Google Chrome for optimal experience</p></div>
     <div id=g>
@@ -132,8 +169,7 @@ svg { width: 1.5em; height: 1.5em; fill: currentColor; }
         <p>
           <i><b>W</b><b>A</b><b>S</b><b>D</b></i>Swim
           <i><b>Q</b><b>E</b></i>Down / up
-          <i><b>Shift</b></i>Faster
-          <i><b>1</b>–<b>6</b></i>Viewpoints
+          <i><b>Shift</b></i>Dash
         </p>
         <p>
           <i><b>Esc</b></i>Menu
@@ -141,15 +177,16 @@ svg { width: 1.5em; height: 1.5em; fill: currentColor; }
           <i><b>H</b></i>Stats
         </p>
       </div>
-      <p id=h>Hold to swim forward · slide to steer · second finger to go faster</p>
+      <p id=hint></p>
+      <p id=h></p>
     </div>
   </div>
   <p id=f>
-    <a href=https://github.com/Noniv/abyssal-garden target=_blank><svg viewBox="0 0 16 16"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg>GitHub</a>
-    <a href=https://ko-fi.com/noniv target=_blank><svg viewBox="0 0 24 24"><path fill-rule=evenodd d="M2 5h16.5a4.5 4.5 0 0 1 0 9H17a6 6 0 0 1-6 5H8a6 6 0 0 1-6-6zM17 8v3h1.5a1.5 1.5 0 0 0 0-3zM9.5 15.5 5.9 12a2.2 2.2 0 0 1 3.6-2.5 2.2 2.2 0 0 1 3.6 2.5z"/></svg>Support</a>
+    <a href=https://github.com/Noniv/abyssal-garden target=_blank>World: Abyssal Garden by Maksymilian Dendura (MIT)</a>
   </p>
 </div>
 <button id=o aria-label=Menu>≡</button>
+<div id=u><b id=ul></b><span>🐟</span><i class=bar><i id=ue></i></i><span>⚡</span><i class=bar><i id=us></i></i><b id=ut></b></div>
 <pre id=i></pre>
 <script>
 /*SCRIPT*/

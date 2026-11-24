@@ -1,4 +1,30 @@
-# Abyssal Garden
+# Abyss Bite
+
+**A small eat-and-grow fish game in a procedural underwater world, right in your browser.**
+
+You are a small fish. Eat the fish smaller than you (green), grow through five levels, and keep away from the bigger ones (red): they chase you when they see you, and you can lose them behind rock or with a dash. Fill level 5 to rule the abyss.
+
+| | Keyboard & mouse |
+|---|---|
+| Look / steer | Move the mouse |
+| Swim | `W` `A` `S` `D`, `E` / `Q` up / down |
+| Dash (uses stamina) | Hold `Shift` |
+| Pause | `Esc` |
+| Sound on / off | `M` |
+
+On a touchscreen: hold to swim forward, slide to steer, a second finger to dash.
+
+Needs a browser with **WebGPU** (desktop Chrome or Edge work best).
+
+The game code is in [`source/src/game.js`](source/src/game.js); the fish are drawn by `vsGame` / `fsGame` in [`source/src/shaders.js`](source/src/shaders.js).
+
+## Credits
+
+The world, renderer and soundscape are **[Abyssal Garden](https://github.com/Noniv/abyssal-garden) by Maksymilian Dendura**, used under the MIT license (see [LICENSE](LICENSE); the notice is also kept at the top of `index.html`). Everything below is the original project's README.
+
+---
+
+## Abyssal Garden (original README)
 
 **A dreamy underwater world you can swim through, right in your browser.**
 
